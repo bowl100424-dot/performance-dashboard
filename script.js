@@ -1,4 +1,4 @@
-// ⚠️ 아래 큰따옴표 안에 본인의 Google Apps Script 배포 URL을 넣어주세요!
+// ⚠️ 여기에 본인의 Google Apps Script 배포 URL을 넣어주세요!
 const API_URL = https://script.google.com/macros/s/AKfycbwHJxo7aobH3VPreVfezO8Hm4_cxIzgQGdaw-qQnjyf82-TloI6MaVg5j5Fpil5XlV-/exec;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,43 +10,54 @@ async function fetchDataAndRender() {
     const response = await fetch(API_URL);
     const data = await response.json();
 
-    // API에서 받아온 데이터 구조에 맞춰 반영 (데이터 배열)
-    // data 예시: [{ date: '2026-07-01', distance: 5.2, pace: '5:30', hr: 145 }, ...]
+    // 데이터가 성공적으로 오는지 확인 (디버깅용)
+    console.log("받아온 전체 데이터:", data);
+
+    if (!data || data.length === 0) {
+      console.warn("데이터가 비어있습니다.");
+      return;
+    }
+
     renderKPI(data);
     renderCharts(data);
   } catch (error) {
     console.error("데이터를 불러오는 중 오류가 발생했습니다:", error);
+    document.body.innerHTML = `<h1>데이터 로딩 오류</h1><p>${error.message}</p>`;
   }
 }
 
 // 1. KPI 카드 업데이트
 function renderKPI(data) {
-  if (!data || data.length === 0) return;
+  // ⚠️ 괄호 안에 본인의 구글 시트 헤더(제목) 이름을 대소문자까지 똑같이 적어야 합니다!
 
-  // 총 거리 계산
-  const totalDist = data.reduce((acc, cur) => acc + (Number(cur.distance) || 0), 0);
+  // 총 거리 계산 (헤더 이름: 거리(km) 라고 가정)
+  // 만약 시트에 '거리'라고 되어 있다면 ['거리']로 고치세요.
+  const totalDist = data.reduce((acc, cur) => acc + (Number(cur['거리(km)']) || 0), 0);
   document.getElementById("total-distance").innerText = `${totalDist.toFixed(1)} km`;
 
-  // 평균 심박수 계산
-  const hrList = data.map(d => Number(d.hr)).filter(h => h > 0);
+  // 평균 심박수 계산 (헤더 이름: 심박수 라고 가정)
+  const hrList = data.map(d => Number(d['심박수'])).filter(h => h > 0);
   const avgHR = hrList.length > 0 ? Math.round(hrList.reduce((a, b) => a + b, 0) / hrList.length) : 0;
   document.getElementById("avg-hr").innerText = `${avgHR} bpm`;
 
-  // 이번 주 거리 (최근 7개 데이터 간단 합산)
+  // 이번 주 거리 (최근 7개 데이터 합산)
   const recentData = data.slice(-7);
-  const weeklyDist = recentData.reduce((acc, cur) => acc + (Number(cur.distance) || 0), 0);
+  const weeklyDist = recentData.reduce((acc, cur) => acc + (Number(cur['거리(km)']) || 0), 0);
   document.getElementById("weekly-distance").innerText = `${weeklyDist.toFixed(1)} km`;
 
-  // 최근 페이스
-  const latestPace = data[data.length - 1]?.pace || "0'00\"";
+  // 최근 페이스 (헤더 이름: 페이스 라고 가정)
+  const latestPace = data[data.length - 1]?.['페이스'] || "0'00\"";
   document.getElementById("avg-pace").innerText = latestPace;
 }
 
 // 2. Chart.js 데이터 시각화
 function renderCharts(data) {
-  const labels = data.map(d => d.date);
-  const distances = data.map(d => d.distance);
-  const hrs = data.map(d => d.hr);
+  // ⚠️ 여기도 마찬가지로 구글 시트 헤더 이름을 대소문자까지 똑같이 적어야 합니다!
+  
+  // 헤더 이름이 '날짜', '거리(km)', '심박수'라고 가정
+  const labels = data.map(d => d['날짜']); 
+  const distances = data.map(d => Number(d['거리(km)']));
+  const hrs = data.map(d => Number(d['심박수']));
 
   // 차트 공통 옵션 (다크모드 스타일)
   const commonOptions = {
