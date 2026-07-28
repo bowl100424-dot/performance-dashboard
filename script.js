@@ -1,5 +1,5 @@
 // ⚠️ 본인의 Google Apps Script 배포 URL을 넣어주세요!
-const API_URL = https://script.google.com/macros/s/AKfycbwHJxo7aobH3VPreVfezO8Hm4_cxIzgQGdaw-qQnjyf82-TloI6MaVg5j5Fpil5XlV-/exec;
+const API_URL = "https://script.google.com/macros/s/AKfycbwHJxo7aobH3VPreVfezO8Hm4_cxIzgQGdaw-qQnjyf82-TloI6MaVg5j5Fpil5XlV-/exec";
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchDataAndRender();
