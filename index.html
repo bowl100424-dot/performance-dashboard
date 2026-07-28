@@ -1,1 +1,57 @@
-a
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance Dashboard</title>
+  <!-- CSS 스타일 연결 -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js 라이브러리 불러오기 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🏃 Performance Dashboard</h1>
+
+    <!-- 1. KPI 요약 카드 영역 -->
+    <div class="kpi-grid">
+      <div class="card">
+        <h3>총 거리</h3>
+        <p id="total-distance">0 km</p>
+      </div>
+      <div class="card">
+        <h3>이번 주 거리</h3>
+        <p id="weekly-distance">0 km</p>
+      </div>
+      <div class="card">
+        <h3>평균 페이스</h3>
+        <p id="avg-pace">0'00"</p>
+      </div>
+      <div class="card">
+        <h3>평균 심박수</h3>
+        <p id="avg-hr">0 bpm</p>
+      </div>
+    </div>
+
+    <!-- 2. 차트 영역 -->
+    <div class="chart-container">
+      <h2>📈 거리 추이 (Distance)</h2>
+      <canvas id="distanceChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>📈 페이스 추이 (Pace)</h2>
+      <canvas id="paceChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>❤️ 심박수 추이 (Heart Rate)</h2>
+      <canvas id="hrChart"></canvas>
+    </div>
+  </div>
+
+  <!-- JS 자바스크립트 연결 -->
+  <script src="script.js"></script>
+</body>
+</html>
