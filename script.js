@@ -1,5 +1,11 @@
-// 본인의 구글 Apps Script 웹 앱 URL을 쌍따옴표("") 사이에 정확히 넣어주세요.
+// 1️⃣ 본인의 구글 Apps Script 웹 앱 URL을 넣어주세요.
 const API_URL = "https://script.google.com/macros/s/AKfycbwHJxo7aobH3VPreVfezO8Hm4_cxIzgQGdaw-qQnjyf82-TloI6MaVg5j5Fpil5XlV-/exec";
+
+// 2️⃣ 구글 시트의 1번째 줄(제목)에 적힌 이름을 대소문자, 띄어쓰기까지 똑같이 적어주세요!
+const KEY_DATE = "날짜";       // 예: "Date", "운동일자", "날짜"
+const KEY_DIST = "거리(km)";   // 예: "Distance", "거리", "거리(km)"
+const KEY_PACE = "페이스";     // 예: "Pace", "평균 페이스"
+const KEY_HR   = "심박수";     // 예: "Avg_HR", "심박수"
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchDataAndRender();
@@ -8,122 +14,93 @@ document.addEventListener("DOMContentLoaded", () => {
 async function fetchDataAndRender() {
   try {
     const response = await fetch(API_URL);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error("네트워크 응답이 좋지 않습니다.");
     const data = await response.json();
     
-    console.log("서버에서 받아온 데이터:", data);
-
-    if (!data || data.length === 0) {
-      console.warn("데이터가 비어있습니다.");
-      return;
-    }
+    if (!data || data.length === 0) return;
 
     renderKPI(data);
     renderCharts(data);
   } catch (error) {
-    console.error("데이터를 불러오는 중 오류 발생:", error);
+    console.error("오류:", error);
   }
 }
 
-// 1. KPI 카드 업데이트 (데이터 키값 자동 대응)
+// 날짜 데이터에서 지저분한 텍스트 빼고 "YYYY-MM-DD"만 깔끔하게 뽑아내는 함수
+function cleanDate(rawDate) {
+  const dateStr = String(rawDate);
+  const match = dateStr.match(/\d{4}-\d{2}-\d{2}/);
+  return match ? match[0] : dateStr.substring(0, 10);
+}
+
+// 1. KPI 카드 업데이트
 function renderKPI(data) {
-  // 첫 번째 데이터 행을 기준으로 키값 자동 탐색 (오류 방지)
-  const sample = data[0] || {};
-  const keys = Object.keys(sample);
-
-  // 거리 관련 키 찾기 (Distance, 거리 등 포함된 것)
-  const distKey = keys.find(k => k.toLowerCase().includes('dist') || k.includes('거리')) || keys[2];
-  // 심박수 관련 키 찾기 (HR, 심박 등 포함된 것)
-  const hrKey = keys.find(k => k.toLowerCase().includes('hr') || k.includes('심박')) || keys[5];
-  // 페이스 관련 키 찾기
-  const paceKey = keys.find(k => k.toLowerCase().includes('pace') || k.includes('페이스')) || keys[4];
-
-  // 총 거리 계산
-  const totalDist = data.reduce((acc, cur) => acc + (Number(cur[distKey]) || 0), 0);
-  const totalDistElem = document.getElementById("total-distance");
-  if (totalDistElem) totalDistElem.innerText = `${totalDist.toFixed(1)} km`;
+  // 총 거리
+  const totalDist = data.reduce((acc, cur) => acc + (Number(cur[KEY_DIST]) || 0), 0);
+  document.getElementById("total-distance").innerText = `${totalDist.toFixed(1)} km`;
 
   // 이번 주 거리
   const recentData = data.slice(-7);
-  const weeklyDist = recentData.reduce((acc, cur) => acc + (Number(cur[distKey]) || 0), 0);
-  const weeklyDistElem = document.getElementById("weekly-distance");
-  if (weeklyDistElem) weeklyDistElem.innerText = `${weeklyDist.toFixed(1)} km`;
+  const weeklyDist = recentData.reduce((acc, cur) => acc + (Number(cur[KEY_DIST]) || 0), 0);
+  document.getElementById("weekly-distance").innerText = `${weeklyDist.toFixed(1)} km`;
 
   // 평균 심박수
-  const hrList = data.map(d => Number(d[hrKey])).filter(h => h > 0);
+  const hrList = data.map(d => Number(d[KEY_HR])).filter(h => h > 0);
   const avgHR = hrList.length > 0 ? Math.round(hrList.reduce((a, b) => a + b, 0) / hrList.length) : 0;
-  const avgHRElem = document.getElementById("avg-hr");
-  if (avgHRElem) avgHRElem.innerText = `${avgHR} bpm`;
+  document.getElementById("avg-hr").innerText = `${avgHR} bpm`;
 
   // 최근 페이스
-  const latestPace = data[data.length - 1]?.[paceKey] || "0'00\"";
-  const avgPaceElem = document.getElementById("avg-pace");
-  if (avgPaceElem) avgPaceElem.innerText = latestPace;
+  const latestPace = data[data.length - 1]?.[KEY_PACE] || "0'00\"";
+  document.getElementById("avg-pace").innerText = latestPace;
 }
 
 // 2. Chart.js 시각화
 function renderCharts(data) {
-  const sample = data[0] || {};
-  const keys = Object.keys(sample);
-
-  const dateKey = keys.find(k => k.toLowerCase().includes('date') || k.includes('날짜')) || keys[0];
-  const distKey = keys.find(k => k.toLowerCase().includes('dist') || k.includes('거리')) || keys[2];
-  const hrKey = keys.find(k => k.toLowerCase().includes('hr') || k.includes('심박')) || keys[5];
-
-  const labels = data.map(d => d[dateKey] || '');
-  const distances = data.map(d => Number(d[distKey]) || 0);
-  const hrs = data.map(d => Number(d[hrKey]) || 0);
+  // 날짜 데이터 깔끔하게 정제
+  const labels = data.map(d => cleanDate(d[KEY_DATE]));
+  const distances = data.map(d => Number(d[KEY_DIST]) || 0);
+  const hrs = data.map(d => Number(d[KEY_HR]) || 0);
 
   const commonOptions = {
     responsive: true,
     scales: {
       x: { ticks: { color: "#94a3b8" }, grid: { color: "#334155" } },
-      y: { ticks: { color: "#94a3b8" }, grid: { color: "#334155" } }
+      y: { ticks: { color: "#94a3b8" }, grid: { color: "#334155", beginAtZero: true } }
     },
     plugins: {
       legend: { labels: { color: "#f8fafc" } }
     }
   };
 
-  // 거리 차트
-  const distCanvas = document.getElementById("distanceChart");
-  if (distCanvas) {
-    new Chart(distCanvas, {
-      type: "line",
-      data: {
-        labels: labels,
-        datasets: [{
-          label: "거리 (km)",
-          data: distances,
-          borderColor: "#38bdf8",
-          backgroundColor: "rgba(56, 189, 248, 0.2)",
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: commonOptions
-    });
-  }
+  new Chart(document.getElementById("distanceChart"), {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "거리 (km)",
+        data: distances,
+        borderColor: "#38bdf8",
+        backgroundColor: "rgba(56, 189, 248, 0.2)",
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: commonOptions
+  });
 
-  // 심박수 차트
-  const hrCanvas = document.getElementById("hrChart");
-  if (hrCanvas) {
-    new Chart(hrCanvas, {
-      type: "line",
-      data: {
-        labels: labels,
-        datasets: [{
-          label: "심박수 (bpm)",
-          data: hrs,
-          borderColor: "#f43f5e",
-          backgroundColor: "rgba(244, 63, 94, 0.2)",
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: commonOptions
-    });
-  }
+  new Chart(document.getElementById("hrChart"), {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "심박수 (bpm)",
+        data: hrs,
+        borderColor: "#f43f5e",
+        backgroundColor: "rgba(244, 63, 94, 0.2)",
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: commonOptions
+  });
 }
