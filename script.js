@@ -1,4 +1,4 @@
-const sheetURL = "여기에_구글시트_CSV주소_입력";
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRYgZnKzzSVVRlgpcWCEapBhoFawkLyoSSrbm9NqCwE2UXhU5c7Qp08H4CK8KidAW93Ufs8z2icodHy/pub?output=csv";
 
 async function loadData(){
 
