@@ -1,198 +1,150 @@
+const sheetURL = "여기에_구글시트_CSV주소_입력";
 
-// ===============================
-// Performance Dashboard
-// ===============================
+async function loadData(){
 
+  const response = await fetch(sheetURL);
+  const csv = await response.text();
 
-// 테스트 데이터
-// 나중에 Google Sheets 데이터로 교체
+  const rows = csv.trim().split("\n");
 
-const workoutData = [
+  const headers = rows[0].split(",");
 
-  {
-    date:"2026-07-29",
-    distance:8.4,
-    time:45,
-    pace:526,
-    hr:155,
-    cadence:187,
-    pre:8
-  },
+  const data = rows.slice(1).map(row=>{
 
-  {
-    date:"2026-07-27",
-    distance:10,
-    time:50,
-    pace:500,
-    hr:150,
-    cadence:184,
-    pre:7
-  },
+    const values = row.split(",");
 
-  {
-    date:"2026-07-25",
-    distance:15,
-    time:75,
-    pace:510,
-    hr:148,
-    cadence:182,
-    pre:6
-  }
+    let obj={};
 
-];
+    headers.forEach((h,i)=>{
+      obj[h.trim()] = values[i]?.trim();
+    });
+
+    return obj;
+
+  });
 
 
-
-// ===============================
-// 페이스 변환
-// 526 → 5:26
-// 1032 → 10:32
-// ===============================
-
-function convertPace(value){
-
-    let str = value.toString();
-
-    let min;
-    let sec;
-
-
-    if(str.length <= 2){
-
-        min = 0;
-        sec = Number(str);
-
-    } else {
-
-        min = Math.floor(Number(str) / 100);
-        sec = Number(str) % 100;
-
-    }
-
-
-    return `${min}:${sec.toString().padStart(2,"0")}`;
+  renderDashboard(data);
 
 }
 
 
 
-// ===============================
-// 최근 7일 계산
-// ===============================
+function convertPace(value){
 
-let totalDistance = 0;
-let totalTime = 0;
+  if(!value) return "-";
 
+  let num = Number(value);
 
-workoutData.forEach(item=>{
+  let min = Math.floor(num / 100);
+  let sec = num % 100;
 
-    totalDistance += item.distance;
-    totalTime += item.time;
+  return `${min}:${String(sec).padStart(2,"0")}`;
 
-});
-
-
-document.getElementById("weekDistance").innerText =
-`${totalDistance.toFixed(1)} km`;
-
-
-document.getElementById("weekTime").innerText =
-`${totalTime} 분`;
+}
 
 
 
+function renderDashboard(data){
 
-// ===============================
-// 그래프 생성 함수
-// ===============================
+
+  let totalDistance = 0;
+  let totalTime = 0;
+
+
+  data.forEach(item=>{
+
+    totalDistance += Number(item["거리"]) || 0;
+    totalTime += Number(item["운동시간"]) || 0;
+
+  });
+
+
+
+  document.getElementById("weekDistance").innerText =
+  `${totalDistance.toFixed(1)} km`;
+
+
+  document.getElementById("weekTime").innerText =
+  `${totalTime} 분`;
+
+
+
+  createChart(
+    "distanceChart",
+    "거리",
+    data.map(x=>Number(x["거리"]))
+  );
+
+
+  createChart(
+    "paceChart",
+    "페이스",
+    data.map(x=>convertPace(x["페이스(초)"]))
+  );
+
+
+  createChart(
+    "hrChart",
+    "평균심박",
+    data.map(x=>Number(x["평균심박"]))
+  );
+
+
+  createChart(
+    "cadenceChart",
+    "케이던스",
+    data.map(x=>Number(x["케이던스"]))
+  );
+
+
+  createChart(
+    "timeChart",
+    "운동시간",
+    data.map(x=>Number(x["운동시간"]))
+  );
+
+
+  createChart(
+    "preChart",
+    "PRE",
+    data.map(x=>Number(x["PRE[1~10]"]))
+  );
+
+
+}
+
+
 
 
 function createChart(id,title,values){
 
-const chart = new ApexCharts(
-document.querySelector("#"+id),
+  const chart = new ApexCharts(
+    document.querySelector("#"+id),
 
-{
+    {
 
-chart:{
-type:"line",
-height:300
-},
+      chart:{
+        type:"line",
+        height:300
+      },
 
-series:[
-{
-name:title,
-data:values
-}
-],
+      series:[
+        {
+          name:title,
+          data:values
+        }
+      ]
 
-xaxis:{
-categories:
-workoutData.map(x=>x.date)
-}
+    }
 
-}
-
-);
+  );
 
 
-chart.render();
-
+  chart.render();
 
 }
 
 
 
-// 거리
-
-createChart(
-"distanceChart",
-"거리",
-workoutData.map(x=>x.distance)
-);
-
-
-// 심박
-
-createChart(
-"hrChart",
-"심박",
-workoutData.map(x=>x.hr)
-);
-
-
-// 케이던스
-
-createChart(
-"cadenceChart",
-"케이던스",
-workoutData.map(x=>x.cadence)
-);
-
-
-// 시간
-
-createChart(
-"timeChart",
-"운동시간",
-workoutData.map(x=>x.time)
-);
-
-
-// PRE
-
-createChart(
-"preChart",
-"PRE",
-workoutData.map(x=>x.pre)
-);
-
-
-
-// 페이스
-
-createChart(
-"paceChart",
-"페이스",
-workoutData.map(x=>convertPace(x.pace))
-);
+loadData();
