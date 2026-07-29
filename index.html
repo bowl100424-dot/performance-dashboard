@@ -4,54 +4,65 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Performance Dashboard</title>
-  <!-- CSS 스타일 연결 -->
+
   <link rel="stylesheet" href="style.css">
-  <!-- Chart.js 라이브러리 불러오기 -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
+
 <body>
 
-  <div class="container">
-    <h1>🏃 Performance Dashboard</h1>
+<div class="container">
 
-    <!-- 1. KPI 요약 카드 영역 -->
-    <div class="kpi-grid">
-      <div class="card">
-        <h3>총 거리</h3>
-        <p id="total-distance">0 km</p>
-      </div>
-      <div class="card">
-        <h3>이번 주 거리</h3>
-        <p id="weekly-distance">0 km</p>
-      </div>
-      <div class="card">
-        <h3>평균 페이스</h3>
-        <p id="avg-pace">0'00"</p>
-      </div>
-      <div class="card">
-        <h3>평균 심박수</h3>
-        <p id="avg-hr">0 bpm</p>
-      </div>
+  <h1>🏃 Performance Dashboard</h1>
+
+  <div class="cards">
+
+    <div class="card">
+      <h3>최근 7일 거리</h3>
+      <h2 id="weekDistance">- km</h2>
     </div>
 
-    <!-- 2. 차트 영역 -->
-    <div class="chart-container">
-      <h2>📈 거리 추이 (Distance)</h2>
-      <canvas id="distanceChart"></canvas>
+    <div class="card">
+      <h3>최근 7일 운동시간</h3>
+      <h2 id="weekTime">- 분</h2>
     </div>
 
-    <div class="chart-container">
-      <h2>📈 페이스 추이 (Pace)</h2>
-      <canvas id="paceChart"></canvas>
-    </div>
-
-    <div class="chart-container">
-      <h2>❤️ 심박수 추이 (Heart Rate)</h2>
-      <canvas id="hrChart"></canvas>
-    </div>
   </div>
 
-  <!-- JS 자바스크립트 연결 -->
-  <script src="script.js"></script>
+  <div class="chart-box">
+      <h2>거리</h2>
+      <div id="distanceChart"></div>
+  </div>
+
+  <div class="chart-box">
+      <h2>페이스</h2>
+      <div id="paceChart"></div>
+  </div>
+
+  <div class="chart-box">
+      <h2>평균심박</h2>
+      <div id="hrChart"></div>
+  </div>
+
+  <div class="chart-box">
+      <h2>케이던스</h2>
+      <div id="cadenceChart"></div>
+  </div>
+
+  <div class="chart-box">
+      <h2>운동시간</h2>
+      <div id="timeChart"></div>
+  </div>
+
+  <div class="chart-box">
+      <h2>PRE</h2>
+      <div id="preChart"></div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+
 </body>
 </html>
