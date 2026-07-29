@@ -3,9 +3,9 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwHJxo7aobH3VPreVfezO8H
 
 // 2️⃣ 구글 시트의 1번째 줄(제목)에 적힌 이름을 대소문자, 띄어쓰기까지 똑같이 적어주세요!
 const KEY_DATE = "날짜";       // 예: "Date", "운동일자", "날짜"
-const KEY_DIST = "거리(km)";   // 예: "Distance", "거리", "거리(km)"
+const KEY_DIST = "거리";   // 예: "Distance", "거리", "거리(km)"
 const KEY_PACE = "페이스";     // 예: "Pace", "평균 페이스"
-const KEY_HR   = "심박수";     // 예: "Avg_HR", "심박수"
+const KEY_HR   = "평균심박";     // 예: "Avg_HR", "심박수"
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchDataAndRender();
