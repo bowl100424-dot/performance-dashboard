@@ -73,7 +73,7 @@ function renderDashboard(data){
   createChart(
     "distanceChart",
     "거리",
-    data.map(x=>Number(x["거리"]))
+    parseFloat(x["거리"])
   );
 
 
@@ -87,28 +87,28 @@ function renderDashboard(data){
   createChart(
     "hrChart",
     "평균심박",
-    data.map(x=>Number(x["평균심박"]))
+    parseFloat(x["평균심박"])
   );
 
 
   createChart(
     "cadenceChart",
     "케이던스",
-    data.map(x=>Number(x["케이던스"]))
+    parseFloat(x["케이던스"])
   );
 
 
   createChart(
     "timeChart",
     "운동시간",
-    data.map(x=>Number(x["운동시간"]))
+    parseFloat(x["운동시간"])
   );
 
 
   createChart(
     "preChart",
     "PRE",
-    data.map(x=>Number(x["PRE[1~10]"]))
+    parseFloat(x["PRE[1~10]"])
   );
 
 
@@ -121,12 +121,30 @@ function createChart(id,title,values){
 
   const chart = new ApexCharts(
     document.querySelector("#"+id),
-
     {
 
       chart:{
         type:"line",
-        height:300
+        height:300,
+        zoom:{
+          enabled:true
+        }
+      },
+
+      stroke:{
+        curve:"smooth"
+      },
+
+      markers:{
+        size:5
+      },
+
+      xaxis:{
+        categories: workoutData.map(x=>x["진짜 날짜"])
+      },
+
+      yaxis:{
+        forceNiceScale:true
       },
 
       series:[
@@ -137,7 +155,6 @@ function createChart(id,title,values){
       ]
 
     }
-
   );
 
 
